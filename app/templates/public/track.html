@@ -1,0 +1,166 @@
+{% extends "base.html" %}
+
+{% block title %}Track Report Progress{% endblock %}
+
+{% block content %}
+<div class="container" style="max-width: 800px; padding-top: var(--space-8);">
+  <div style="margin-bottom: var(--space-6); text-align: center;">
+    <h1>Track Issue Progress</h1>
+    <p class="page-lead" style="margin: 0 auto;">
+      Enter your unique Report ID (e.g. <code>CC-001</code>) to check current progress and chronological updates.
+    </p>
+  </div>
+
+  <!-- Search Box -->
+  <div class="card" style="margin-bottom: var(--space-8); padding: var(--space-6);">
+    <form method="POST" action="{{ url_for('public.track') }}" style="display: flex; gap: var(--space-3); flex-wrap: wrap;">
+      {{ form.csrf_token }}
+      <div style="flex: 1; min-width: 240px;">
+        <label for="report_id" class="form-label">Report ID</label>
+        {{ form.report_id(class="form-control", id="report_id", style="text-transform: uppercase; font-family: monospace; font-size: 1.125rem; font-weight: 700; letter-spacing: 0.05em;") }}
+      </div>
+      <div style="display: flex; align-items: flex-end;">
+        <button type="submit" class="btn btn-primary btn-lg">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="11" cy="11" r="8"></circle>
+            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+          </svg>
+          Track Status
+        </button>
+      </div>
+    </form>
+    {% for err in form.report_id.errors %}
+      <div class="form-error" role="alert" style="margin-top: var(--space-2);">{{ err }}</div>
+    {% endfor %}
+  </div>
+
+  <!-- Tracking Result -->
+  {% if report %}
+    <div class="card" style="margin-bottom: var(--space-8);">
+      <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: var(--space-4); flex-wrap: wrap; gap: var(--space-3);">
+        <div>
+          <span style="font-size: var(--text-xs); color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em;">
+            Report Tracking Summary
+          </span>
+          <h2 style="font-family: monospace; color: var(--primary); margin-top: 4px;">
+            {{ report.report_id }}
+          </h2>
+        </div>
+        <div style="text-align: right;">
+          <span class="badge badge-status-{{ report.status.lower().replace(' ', '-') }}" style="font-size: var(--text-sm); padding: 6px 14px;">
+            <span class="badge-dot" style="width: 8px; height: 8px;"></span>
+            Current Status: {{ report.status }}
+          </span>
+        </div>
+      </div>
+
+      <!-- Report Metadata -->
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: var(--space-4); padding: var(--space-4); background: var(--bg-page); border: 1px solid var(--border); border-radius: var(--radius-md); margin-bottom: var(--space-6); font-size: var(--text-sm);">
+        <div>
+          <div class="text-muted" style="font-size: var(--text-xs);">Category</div>
+          <strong>{{ report.category }}</strong>
+        </div>
+        <div>
+          <div class="text-muted" style="font-size: var(--text-xs);">Area / Locality</div>
+          <strong>📍 {{ report.area }}</strong>
+        </div>
+        <div>
+          <div class="text-muted" style="font-size: var(--text-xs);">Submitted On</div>
+          <strong>{{ report.created_at.strftime('%b %d, %Y at %I:%M %p') }}</strong>
+        </div>
+        <div>
+          <div class="text-muted" style="font-size: var(--text-xs);">Public Directory</div>
+          <strong>{% if report.is_public and not report.is_hidden %}Listed{% else %}Under Review / Private{% endif %}</strong>
+        </div>
+      </div>
+
+      <!-- Description -->
+      <div style="margin-bottom: var(--space-6);">
+        <h4 style="font-size: var(--text-sm); color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: var(--space-2);">
+          Reported Description
+        </h4>
+        <p style="background: var(--surface); padding: var(--space-3); border: 1px solid var(--border); border-radius: var(--radius-md); font-size: var(--text-sm); line-height: 1.5;">
+          {{ report.description }}
+        </p>
+      </div>
+
+      <!-- Approved Photo Preview (if approved) -->
+      {% if report.photo_path and report.photo_approved %}
+      <div style="margin-bottom: var(--space-6);">
+        <h4 style="font-size: var(--text-sm); color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: var(--space-2);">
+          Attached Photo (Verified)
+        </h4>
+        <img src="{{ url_for('public.uploaded_file', filename=report.photo_path) }}" alt="Photo attached to report {{ report.report_id }}" style="max-height: 280px; border-radius: var(--radius-md); border: 1px solid var(--border); object-fit: cover;">
+      </div>
+      {% endif %}
+
+      <!-- Chronological Status Timeline -->
+      <div>
+        <h3 style="font-size: var(--text-lg); margin-bottom: var(--space-4);">
+          Progress & Verification Timeline
+        </h3>
+
+        {% if history %}
+          <div class="timeline" role="region" aria-label="Status update history">
+            {% for item in history %}
+            <div class="timeline-item">
+              <div class="timeline-dot">
+                <div style="width: 8px; height: 8px; border-radius: 50%; background-color: var(--primary);"></div>
+              </div>
+              <div class="timeline-content">
+                <div class="timeline-header">
+                  <div>
+                    <span class="badge badge-status-{{ item.new_status.lower().replace(' ', '-') }}">
+                      {{ item.new_status }}
+                    </span>
+                    {% if item.old_status and item.old_status != item.new_status %}
+                      <span style="font-size: var(--text-xs); color: var(--text-subtle); margin-left: 6px;">
+                        (transitioned from {{ item.old_status }})
+                      </span>
+                    {% endif %}
+                  </div>
+                  <time class="timeline-time" datetime="{{ item.updated_at.isoformat() }}">
+                    {{ item.updated_at.strftime('%b %d, %Y at %I:%M %p') }}
+                  </time>
+                </div>
+                {% if item.note %}
+                  <div class="timeline-note">
+                    {{ item.note }}
+                  </div>
+                {% endif %}
+              </div>
+            </div>
+            {% endfor %}
+          </div>
+        {% else %}
+          <p class="text-muted" style="font-size: var(--text-sm);">No public timeline entries recorded yet.</p>
+        {% endif %}
+      </div>
+    </div>
+
+  {% elif not_found %}
+    <div class="empty-state">
+      <svg class="empty-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="10"></circle>
+        <line x1="12" y1="8" x2="12" y2="12"></line>
+        <line x1="12" y1="16" x2="12.01" y2="16"></line>
+      </svg>
+      <div class="empty-title">Report ID Not Found</div>
+      <p class="empty-desc">
+        We could not locate any report with ID <strong>{{ searched_id }}</strong>. Please check that you entered the full ID with the 'CC-' prefix (e.g. CC-001) or submit a new report.
+      </p>
+      <a href="{{ url_for('public.report') }}" class="btn btn-primary btn-sm">Submit New Report</a>
+    </div>
+  {% else %}
+    <!-- Initial Prompt Helper -->
+    <div class="card text-center" style="padding: var(--space-8); background: var(--surface-alt); border: 2px dashed var(--border);">
+      <h3 style="font-size: var(--text-base); color: var(--text-muted); margin-bottom: var(--space-2);">
+        Looking for an existing submission?
+      </h3>
+      <p style="font-size: var(--text-sm); color: var(--text-subtle); max-width: 500px; margin: 0 auto;">
+        Enter your assigned tracking number from your confirmation screen (format: CC-XXX). You can view the live status even if the issue has not yet been approved for the public directory.
+      </p>
+    </div>
+  {% endif %}
+</div>
+{% endblock %}

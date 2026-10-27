@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+
+{% block title %}About & Responsible Use{% endblock %}
+
+{% block content %}
+<div class="container" style="max-width: 800px; padding-top: var(--space-8);">
+  <div style="margin-bottom: var(--space-8);">
+    <h1>About CivicConnect</h1>
+    <p class="page-lead">
+      A collegiate Community Engagement Project (CEP) exploring how lightweight digital tools can organize grassroots civic feedback and mobilize constructive local participation.
+    </p>
+  </div>
+
+  <div class="card" style="margin-bottom: var(--space-6);">
+    <h3 style="color: var(--primary-dark); margin-bottom: var(--space-3);">Project Purpose & Origins</h3>
+    <p style="font-size: var(--text-sm); color: var(--text-muted); line-height: 1.6; margin-bottom: var(--space-3);">
+      In many college neighborhoods and campus surroundings, everyday problems—such as overflowing trash bins, broken street fixtures, or stagnant puddle overflow—are shared casually across unstructured chat groups, calls, or lost in passing remarks.
+    </p>
+    <p style="font-size: var(--text-sm); color: var(--text-muted); line-height: 1.6;">
+      <strong>CivicConnect</strong> was designed by student researchers to provide a single, structured, transparent ledger where community members can log categorized issues, track real-world verification progress by ID, and view aggregated data on neighborhood concerns.
+    </p>
+  </div>
+
+  <div class="card" style="margin-bottom: var(--space-6); border-left: 4px solid var(--accent);">
+    <h3 style="color: #92400E; margin-bottom: var(--space-3);">Explicit Scope & Boundary Policy</h3>
+    <p style="font-size: var(--text-sm); color: var(--text-muted); line-height: 1.6; margin-bottom: var(--space-3);">
+      <strong>Version 1 is a community recording and tracking portal ONLY.</strong>
+    </p>
+    <ul style="padding-left: var(--space-6); font-size: var(--text-sm); color: var(--text-muted); line-height: 1.6; display: flex; flex-direction: column; gap: var(--space-2);">
+      <li>The platform does <strong>not</strong> have direct integration with, nor does it automatically dispatch complaints to, municipal corporations, public utility boards, or law enforcement.</li>
+      <li>No official government action is guaranteed or implied.</li>
+      <li>The status label <strong>"Resolved"</strong> means verified by project members or volunteer workgroups following physical inspection or community action.</li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <h3 style="color: var(--primary-dark); margin-bottom: var(--space-3);">Technology Stack & Architecture</h3>
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: var(--space-4); font-size: var(--text-sm);">
+      <div>
+        <strong>Frontend:</strong>
+        <div class="text-muted">HTML5, CSS3 Vanilla Design System, Inter font, Chart.js</div>
+      </div>
+      <div>
+        <strong>Backend:</strong>
+        <div class="text-muted">Python 3.11+, Flask Application Factory, Blueprints</div>
+      </div>
+      <div>
+        <strong>Database:</strong>
+        <div class="text-muted">MySQL 8 (with SQLAlchemy ORM & Parameterized Queries)</div>
+      </div>
+      <div>
+        <strong>Security & Privacy:</strong>
+        <div class="text-muted">Flask-Login, CSRF Tokens, Rate Limiting, Pillow EXIF Scrubber</div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

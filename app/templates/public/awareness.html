@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+
+{% block title %}Community Awareness & Events{% endblock %}
+
+{% block content %}
+<div class="container" style="padding-top: var(--space-8);">
+  <div style="margin-bottom: var(--space-8); display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: var(--space-4);">
+    <div>
+      <h1>Community Awareness & Campaigns</h1>
+      <p class="page-lead" style="margin-bottom: 0;">
+        Explore upcoming neighborhood cleanup drives, civic workshops, and student volunteer activities.
+      </p>
+    </div>
+    {% if current_user.is_authenticated %}
+      <a href="{{ url_for('admin.events') }}" class="btn btn-outline btn-sm">
+        + Manage Events in Admin
+      </a>
+    {% endif %}
+  </div>
+
+  {% if events %}
+    <div class="grid-3">
+      {% for event in events %}
+      <div class="card" style="display: flex; flex-direction: column; justify-content: space-between; border-top: 4px solid var(--primary);">
+        <div>
+          <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: var(--space-3);">
+            <span class="badge" style="background-color: var(--primary-light); color: var(--primary-dark);">
+              📅 {{ event.date.strftime('%a, %b %d') }}
+            </span>
+            <span style="font-size: var(--text-xs); color: var(--text-subtle);">
+              {{ event.date.strftime('%I:%M %p') }}
+            </span>
+          </div>
+
+          <h3 style="font-size: var(--text-lg); margin-bottom: var(--space-3); color: var(--text-main);">
+            {{ event.title }}
+          </h3>
+
+          <p style="font-size: var(--text-sm); color: var(--text-muted); margin-bottom: var(--space-4); line-height: 1.5;">
+            {{ event.description }}
+          </p>
+        </div>
+
+        <div style="border-top: 1px solid var(--border); padding-top: var(--space-3); font-size: var(--text-xs); color: var(--text-subtle); display: flex; flex-direction: column; gap: 4px;">
+          <div><strong>📍 Location:</strong> {{ event.location }}</div>
+          <div><strong>👥 Organizer:</strong> {{ event.organizer }}</div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  {% else %}
+    <div class="empty-state">
+      <svg class="empty-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+        <line x1="16" y1="2" x2="16" y2="6"></line>
+        <line x1="8" y1="2" x2="8" y2="6"></line>
+        <line x1="3" y1="10" x2="21" y2="10"></line>
+      </svg>
+      <div class="empty-title">No Events Scheduled Yet</div>
+      <p class="empty-desc">
+        There are currently no community awareness drives or workshops scheduled. Please check back soon or consult the student project team.
+      </p>
+    </div>
+  {% endif %}
+</div>
+{% endblock %}

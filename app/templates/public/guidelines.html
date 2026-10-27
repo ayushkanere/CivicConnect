@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+
+{% block title %}Community Guidelines & Reporting Rules{% endblock %}
+
+{% block content %}
+<div class="container" style="max-width: 800px; padding-top: var(--space-8);">
+  <div style="margin-bottom: var(--space-8);">
+    <h1>Community Guidelines & Responsible Use</h1>
+    <p class="page-lead">
+      CivicConnect is built to foster constructive community dialogue and data-backed local improvements. To ensure fairness and privacy, all users must adhere to these standards.
+    </p>
+  </div>
+
+  <div class="card" style="margin-bottom: var(--space-6);">
+    <h3 style="color: var(--primary-dark); margin-bottom: var(--space-3);">1. Authentic, Constructive Reporting</h3>
+    <ul style="padding-left: var(--space-6); font-size: var(--text-sm); color: var(--text-muted); line-height: 1.6; display: flex; flex-direction: column; gap: var(--space-2);">
+      <li><strong>No False or Fabricated Reports:</strong> Only report conditions that you have directly observed. Deliberately submitting misleading or fictitious problems disrupts volunteer efforts and degrades data integrity.</li>
+      <li><strong>Check for Existing Reports:</strong> Before creating a new submission, glance at the Public Issue directory to avoid duplicating existing entries. Duplicate reports will be flagged and consolidated.</li>
+      <li><strong>Accurate Details:</strong> Provide objective, factual descriptions (e.g. "large pothole on outer perimeter road") rather than vague complaints.</li>
+    </ul>
+  </div>
+
+  <div class="card" style="margin-bottom: var(--space-6);">
+    <h3 style="color: var(--primary-dark); margin-bottom: var(--space-3);">2. Privacy Protection & Personal Information</h3>
+    <ul style="padding-left: var(--space-6); font-size: var(--text-sm); color: var(--text-muted); line-height: 1.6; display: flex; flex-direction: column; gap: var(--space-2);">
+      <li><strong>No Personal Contact Information:</strong> Do NOT enter personal phone numbers, private email addresses, or full personal names in the report description or area fields.</li>
+      <li><strong>No Exact Home Addresses:</strong> Provide neighborhood references, road junctions, or campus landmarks only. Never publish private residential flat numbers.</li>
+      <li><strong>Photo Metadata Stripping:</strong> All photos uploaded to the platform have their EXIF / GPS metadata permanently stripped upon receipt to prevent location tracking.</li>
+    </ul>
+  </div>
+
+  <div class="card" style="margin-bottom: var(--space-6);">
+    <h3 style="color: var(--primary-dark); margin-bottom: var(--space-3);">3. Zero Tolerance for Abusive or Defamatory Content</h3>
+    <ul style="padding-left: var(--space-6); font-size: var(--text-sm); color: var(--text-muted); line-height: 1.6; display: flex; flex-direction: column; gap: var(--space-2);">
+      <li><strong>No Targeted Harassment:</strong> Reports accusing specific individuals, employees, or neighbors by name are strictly prohibited. Such submissions will be hidden immediately.</li>
+      <li><strong>Civil Language:</strong> Profanity, hate speech, threats, and derogatory remarks will result in immediate removal and rate-limiting.</li>
+    </ul>
+  </div>
+
+  <div class="card" style="background-color: var(--surface-alt); border-color: var(--border);">
+    <h3 style="color: var(--text-main); margin-bottom: var(--space-2);">4. Understanding Resolution & Limitations</h3>
+    <p style="font-size: var(--text-sm); color: var(--text-muted); line-height: 1.5; margin-bottom: var(--space-3);">
+      This platform is a student-led initiative for a Community Engagement Project (CEP). Marking an issue as <strong>Resolved</strong> indicates that student volunteers or project members have verified local rectification (e.g., litter cleanups, placement of caution signs, or verification of repaired fixtures). It does <strong>not</strong> signify official municipality or government legal sign-off.
+    </p>
+  </div>
+</div>
+{% endblock %}

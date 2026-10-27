@@ -1,0 +1,242 @@
+{% extends "base.html" %}
+
+{% block title %}Community Issue Reporting & Awareness{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="hero">
+  <div class="container">
+    <div class="hero-tag">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="10"></circle>
+        <polygon points="12 6 12 12 16 14"></polygon>
+      </svg>
+      College Community Engagement Project (CEP)
+    </div>
+    <h1 class="hero-title">
+      A Digital Platform for <span class="highlight">Community Issue</span> Reporting & Awareness
+    </h1>
+    <p class="hero-desc">
+      Empowering residents and students to record local infrastructure concerns, track verified volunteer progress, and participate in community action.
+    </p>
+
+    <div class="hero-ctas">
+      <a href="{{ url_for('public.report') }}" class="btn btn-primary btn-lg">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10"></circle>
+          <line x1="12" y1="8" x2="12" y2="16"></line>
+          <line x1="8" y1="12" x2="16" y2="12"></line>
+        </svg>
+        Report an Issue
+      </a>
+      <a href="{{ url_for('public.track') }}" class="btn btn-secondary btn-lg">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="11" cy="11" r="8"></circle>
+          <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+        </svg>
+        Track a Report
+      </a>
+      <a href="{{ url_for('public.issues') }}" class="btn btn-outline btn-lg">
+        Browse Public Issues
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- Quick Stats Bar -->
+<section class="container" style="margin-top: -32px; position: relative; z-index: 10;">
+  <div class="grid-4">
+    <div class="stat-card">
+      <span class="stat-label">Total Reports</span>
+      <span class="stat-value">{{ stats.total_reports }}</span>
+      <span class="stat-subtext">Logged on portal</span>
+    </div>
+    <div class="stat-card stat-amber">
+      <span class="stat-label">Under Review</span>
+      <span class="stat-value">{{ stats.status_counts.get('Under Review', 0) }}</span>
+      <span class="stat-subtext">Initial inspection</span>
+    </div>
+    <div class="stat-card stat-indigo">
+      <span class="stat-label">In Progress</span>
+      <span class="stat-value">{{ stats.status_counts.get('In Progress', 0) }}</span>
+      <span class="stat-subtext">Active action</span>
+    </div>
+    <div class="stat-card stat-green">
+      <span class="stat-label">Resolved</span>
+      <span class="stat-value">{{ stats.status_counts.get('Resolved', 0) }}</span>
+      <span class="stat-subtext">Verified team resolution</span>
+    </div>
+  </div>
+</section>
+
+<!-- Three Core Pillars -->
+<section class="container" style="padding-top: var(--space-12);">
+  <div class="text-center" style="margin-bottom: var(--space-8);">
+    <h2>Our Core Framework</h2>
+    <p class="page-lead" style="margin: 0 auto;">
+      Three pillars designed to bring structure and visibility to grassroots community challenges.
+    </p>
+  </div>
+
+  <div class="grid-3">
+    <div class="card text-center" style="border-top: 4px solid var(--primary);">
+      <div style="width: 50px; height: 50px; background: var(--primary-light); color: var(--primary-dark); border-radius: var(--radius-full); display: flex; align-items: center; justify-content: center; margin: 0 auto var(--space-4);">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+          <polyline points="14 2 14 8 20 8"></polyline>
+          <line x1="16" y1="13" x2="8" y2="13"></line>
+          <line x1="16" y1="17" x2="8" y2="17"></line>
+          <polyline points="10 9 9 9 8 9"></polyline>
+        </svg>
+      </div>
+      <h3>REPORT</h3>
+      <p class="text-muted" style="font-size: var(--text-sm);">
+        Share local problems such as garbage overflow, broken streetlights, road hazards, or water drainage without complicated sign-ups.
+      </p>
+    </div>
+
+    <div class="card text-center" style="border-top: 4px solid var(--accent);">
+      <div style="width: 50px; height: 50px; background: var(--accent-light); color: #92400E; border-radius: var(--radius-full); display: flex; align-items: center; justify-content: center; margin: 0 auto var(--space-4);">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10"></circle>
+          <polyline points="12 6 12 12 14 14"></polyline>
+        </svg>
+      </div>
+      <h3>TRACK</h3>
+      <p class="text-muted" style="font-size: var(--text-sm);">
+        Use your unique tracking ID (e.g., CC-001) to monitor chronological updates, site inspections, and public team notes.
+      </p>
+    </div>
+
+    <div class="card text-center" style="border-top: 4px solid #10B981;">
+      <div style="width: 50px; height: 50px; background: #DCFCE7; color: #166534; border-radius: var(--radius-full); display: flex; align-items: center; justify-content: center; margin: 0 auto var(--space-4);">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+          <circle cx="9" cy="7" r="4"></circle>
+          <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+          <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+        </svg>
+      </div>
+      <h3>IMPROVE</h3>
+      <p class="text-muted" style="font-size: var(--text-sm);">
+        Support community campaigns, volunteer cleanup drives, and data-backed neighborhood awareness initiatives.
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- How It Works (6-step flow) -->
+<section class="container" style="padding-top: var(--space-12);">
+  <div class="text-center" style="margin-bottom: var(--space-8);">
+    <h2>How CivicConnect Works</h2>
+    <p class="page-lead" style="margin: 0 auto;">
+      A transparent 6-step lifecycle from initial submission to verified completion.
+    </p>
+  </div>
+
+  <div class="grid-3" style="gap: var(--space-4);">
+    <div class="step-card">
+      <div class="step-num">1</div>
+      <h4>1. Submit</h4>
+      <p class="text-muted" style="font-size: var(--text-sm);">
+        A resident opens the portal and enters an issue category, brief description, neighborhood area, and optional photo.
+      </p>
+    </div>
+
+    <div class="step-card">
+      <div class="step-num">2</div>
+      <h4>2. Save</h4>
+      <p class="text-muted" style="font-size: var(--text-sm);">
+        The system validates inputs, strips sensitive personal data, and securely logs the record with a unique ID (e.g., CC-001).
+      </p>
+    </div>
+
+    <div class="step-card">
+      <div class="step-num">3</div>
+      <h4>3. Review</h4>
+      <p class="text-muted" style="font-size: var(--text-sm);">
+        Authorized project team members inspect details, verify suitability, flag duplicates, and approve appropriate reports for public viewing.
+      </p>
+    </div>
+
+    <div class="step-card">
+      <div class="step-num">4</div>
+      <h4>4. Update</h4>
+      <p class="text-muted" style="font-size: var(--text-sm);">
+        Status transitions through <em>Under Review</em>, <em>In Progress</em>, to <em>Resolved</em> (which strictly requires a verification note).
+      </p>
+    </div>
+
+    <div class="step-card">
+      <div class="step-num">5</div>
+      <h4>5. Track</h4>
+      <p class="text-muted" style="font-size: var(--text-sm);">
+        Residents input their ID into the tracking tool to view real-time status history and public volunteer notes.
+      </p>
+    </div>
+
+    <div class="step-card">
+      <div class="step-num">6</div>
+      <h4>6. Learn</h4>
+      <p class="text-muted" style="font-size: var(--text-sm);">
+        Live charts summarize patterns by category, and the awareness page highlights upcoming local community events.
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- Recent Public Activity Preview -->
+{% if recent_reports %}
+<section class="container" style="padding-top: var(--space-12);">
+  <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: var(--space-6); flex-wrap: wrap; gap: var(--space-2);">
+    <div>
+      <h2>Recent Public Issues</h2>
+      <p class="text-muted" style="font-size: var(--text-sm);">Approved community issues under active team tracking.</p>
+    </div>
+    <a href="{{ url_for('public.issues') }}" class="btn btn-secondary btn-sm">
+      View All Approved Issues &rarr;
+    </a>
+  </div>
+
+  <div class="grid-3">
+    {% for r in recent_reports %}
+    <div class="card" style="display: flex; flex-direction: column; justify-content: space-between;">
+      <div>
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: var(--space-3);">
+          <span style="font-family: monospace; font-weight: 700; color: var(--primary); font-size: var(--text-sm);">
+            {{ r.report_id }}
+          </span>
+          <span class="badge badge-status-{{ r.status.lower().replace(' ', '-') }}">
+            <span class="badge-dot"></span>
+            {{ r.status }}
+          </span>
+        </div>
+        <div style="margin-bottom: var(--space-2);">
+          <span class="category-chip">{{ r.category }}</span>
+        </div>
+        <p style="font-size: var(--text-sm); color: var(--text-main); margin-bottom: var(--space-3); line-height: 1.4;">
+          {{ r.description[:120] }}{% if r.description|length > 120 %}...{% endif %}
+        </p>
+      </div>
+
+      <div style="border-top: 1px solid var(--border); padding-top: var(--space-3); display: flex; justify-content: space-between; align-items: center; font-size: var(--text-xs); color: var(--text-subtle);">
+        <span>📍 {{ r.area }}</span>
+        <a href="{{ url_for('public.track', id=r.report_id) }}" style="font-weight: 600;">Track &rarr;</a>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+</section>
+{% endif %}
+
+<!-- Bottom Scope Reminder Banner -->
+<section class="container" style="padding-top: var(--space-12);">
+  <div class="card" style="background-color: var(--primary-subtle); border-color: var(--primary-light); text-align: center; padding: var(--space-8);">
+    <h3 style="color: var(--primary-dark); margin-bottom: var(--space-2);">Project Transparency & Ethics</h3>
+    <p style="max-width: 720px; margin: 0 auto var(--space-4); font-size: var(--text-sm); color: var(--text-muted);">
+      CivicConnect is developed for educational and community consultation purposes under a college Community Engagement Project. We do not solicit personal contact info, sell data, or make false guarantees about official municipality dispatches.
+    </p>
+    <a href="{{ url_for('public.guidelines') }}" class="btn btn-primary btn-sm">Read Community Guidelines</a>
+  </div>
+</section>
+{% endblock %}

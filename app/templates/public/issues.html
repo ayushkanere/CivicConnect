@@ -1,0 +1,160 @@
+{% extends "base.html" %}
+
+{% block title %}Public Issue Directory{% endblock %}
+
+{% block content %}
+<div class="container" style="padding-top: var(--space-8);">
+  <div style="margin-bottom: var(--space-6);">
+    <h1>Public Issue Directory</h1>
+    <p class="page-lead">
+      Browse community reports approved for public tracking. Exact contact details and unapproved media are hidden for community privacy.
+    </p>
+  </div>
+
+  <!-- Search and Filter Controls -->
+  <div class="card" style="margin-bottom: var(--space-6); padding: var(--space-4);">
+    <form method="GET" action="{{ url_for('public.issues') }}" style="display: flex; gap: var(--space-3); flex-wrap: wrap; align-items: flex-end;">
+      <!-- Search Input -->
+      <div style="flex: 2; min-width: 240px;">
+        <label for="q" class="form-label">Search by ID or Keyword</label>
+        <input type="text" name="q" id="q" value="{{ q }}" placeholder="e.g., CC-001, streetlight, bus shelter..." class="form-control">
+      </div>
+
+      <!-- Category Filter -->
+      <div style="flex: 1; min-width: 180px;">
+        <label for="category" class="form-label">Category</label>
+        <select name="category" id="category" class="form-control">
+          <option value="">All Categories</option>
+          {% for cat in categories %}
+            <option value="{{ cat }}" {% if current_category == cat %}selected{% endif %}>{{ cat }}</option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <!-- Status Filter -->
+      <div style="flex: 1; min-width: 150px;">
+        <label for="status" class="form-label">Status</label>
+        <select name="status" id="status" class="form-control">
+          <option value="">All Statuses</option>
+          {% for st in statuses %}
+            <option value="{{ st }}" {% if current_status == st %}selected{% endif %}>{{ st }}</option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <!-- Submit & Reset -->
+      <div style="display: flex; gap: var(--space-2);">
+        <button type="submit" class="btn btn-primary">Filter</button>
+        {% if q or current_category or current_status %}
+          <a href="{{ url_for('public.issues') }}" class="btn btn-secondary">Reset</a>
+        {% endif %}
+      </div>
+    </form>
+  </div>
+
+  <!-- Reports Display -->
+  {% if reports %}
+    <div class="table-responsive">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th scope="col">Report ID</th>
+            <th scope="col">Category</th>
+            <th scope="col">Area / Locality</th>
+            <th scope="col">Description</th>
+            <th scope="col">Status</th>
+            <th scope="col">Submitted</th>
+            <th scope="col" style="text-align: right;">Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for r in reports %}
+          <tr>
+            <td data-label="Report ID">
+              <span style="font-family: monospace; font-weight: 700; color: var(--primary);">
+                {{ r.report_id }}
+              </span>
+            </td>
+            <td data-label="Category">
+              <span class="category-chip">{{ r.category }}</span>
+            </td>
+            <td data-label="Area">
+              📍 {{ r.area }}
+            </td>
+            <td data-label="Description" style="max-width: 320px;">
+              {{ r.description[:100] }}{% if r.description|length > 100 %}...{% endif %}
+            </td>
+            <td data-label="Status">
+              <span class="badge badge-status-{{ r.status.lower().replace(' ', '-') }}">
+                <span class="badge-dot"></span>
+                {{ r.status }}
+              </span>
+            </td>
+            <td data-label="Submitted" style="font-size: var(--text-xs); color: var(--text-subtle);">
+              {{ r.created_at.strftime('%Y-%m-%d') }}
+            </td>
+            <td data-label="Action" style="text-align: right;">
+              <a href="{{ url_for('public.track', id=r.report_id) }}" class="btn btn-sm btn-outline">
+                Track &rarr;
+              </a>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Pagination -->
+    {% if pagination.pages > 1 %}
+    <nav aria-label="Report list pagination">
+      <ul class="pagination">
+        {% if pagination.has_prev %}
+          <li class="page-item">
+            <a class="page-link" href="{{ url_for('public.issues', page=pagination.prev_num, q=q, category=current_category, status=current_status) }}">
+              &larr; Prev
+            </a>
+          </li>
+        {% else %}
+          <li class="page-item disabled"><span class="page-link">&larr; Prev</span></li>
+        {% endif %}
+
+        {% for p in pagination.iter_pages(left_edge=1, right_edge=1, left_current=2, right_current=2) %}
+          {% if p %}
+            <li class="page-item {% if p == pagination.page %}active{% endif %}">
+              <a class="page-link" href="{{ url_for('public.issues', page=p, q=q, category=current_category, status=current_status) }}">
+                {{ p }}
+              </a>
+            </li>
+          {% else %}
+            <li class="page-item disabled"><span class="page-link">…</span></li>
+          {% endif %}
+        {% endfor %}
+
+        {% if pagination.has_next %}
+          <li class="page-item">
+            <a class="page-link" href="{{ url_for('public.issues', page=pagination.next_num, q=q, category=current_category, status=current_status) }}">
+              Next &rarr;
+            </a>
+          </li>
+        {% else %}
+          <li class="page-item disabled"><span class="page-link">Next &rarr;</span></li>
+        {% endif %}
+      </ul>
+    </nav>
+    {% endif %}
+
+  {% else %}
+    <div class="empty-state">
+      <svg class="empty-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="11" cy="11" r="8"></circle>
+        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+      </svg>
+      <div class="empty-title">No matching public reports found</div>
+      <p class="empty-desc">
+        Try adjusting your search terms or clearing your category and status filters. Only reports that have been approved by the administrator appear in this public list.
+      </p>
+      <a href="{{ url_for('public.issues') }}" class="btn btn-secondary">Clear Filters</a>
+    </div>
+  {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,133 @@
+{% extends "base.html" %}
+
+{% block title %}Manage Community Events{% endblock %}
+
+{% block content %}
+<div class="container" style="padding-top: var(--space-8);">
+  <div style="margin-bottom: var(--space-6); display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: var(--space-4);">
+    <div>
+      <div style="font-size: var(--text-xs); color: var(--primary); font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;">
+        Admin Management
+      </div>
+      <h1>Community Awareness Events</h1>
+      <p class="text-muted" style="margin-bottom: 0; font-size: var(--text-sm);">
+        Schedule community cleanups, workshops, and awareness drives published to the public portal.
+      </p>
+    </div>
+    <a href="{{ url_for('admin.dashboard') }}" class="btn btn-secondary btn-sm">
+      &larr; Back to Reports Review
+    </a>
+  </div>
+
+  <div class="grid-3" style="align-items: start;">
+    <!-- Left 2 Cols: Events Table -->
+    <div style="grid-column: span 2;">
+      <div class="card">
+        <h3 style="font-size: var(--text-base); margin-bottom: var(--space-4);">Active & Past Events</h3>
+        {% if events %}
+          <div class="table-responsive">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th scope="col">Date</th>
+                  <th scope="col">Event Title</th>
+                  <th scope="col">Location</th>
+                  <th scope="col">Organizer</th>
+                  <th scope="col" style="text-align: right;">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for e in events %}
+                <tr>
+                  <td data-label="Date" style="white-space: nowrap; font-size: var(--text-xs);">
+                    {{ e.date.strftime('%Y-%m-%d %H:%M') }}
+                  </td>
+                  <td data-label="Title">
+                    <strong>{{ e.title }}</strong>
+                  </td>
+                  <td data-label="Location" style="font-size: var(--text-xs);">
+                    📍 {{ e.location }}
+                  </td>
+                  <td data-label="Organizer" style="font-size: var(--text-xs);">
+                    {{ e.organizer }}
+                  </td>
+                  <td data-label="Actions" style="text-align: right; white-space: nowrap;">
+                    <a href="{{ url_for('admin.edit_event', event_id=e.event_id) }}" class="btn btn-sm btn-outline" style="padding: 4px 8px;">
+                      Edit
+                    </a>
+                    <form method="POST" action="{{ url_for('admin.delete_event', event_id=e.event_id) }}" style="display: inline;" onsubmit="return confirm('Delete this event?');">
+                      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                      <button type="submit" class="btn btn-sm btn-danger" style="padding: 4px 8px;">
+                        Delete
+                      </button>
+                    </form>
+                  </td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        {% else %}
+          <p class="text-muted" style="font-size: var(--text-sm);">No events created yet.</p>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- Right Col: Create Event Form -->
+    <div>
+      <div class="card" style="border-top: 4px solid var(--primary);">
+        <h3 style="font-size: var(--text-base); margin-bottom: var(--space-3);">Create New Event</h3>
+        <form method="POST" action="{{ url_for('admin.events') }}" novalidate>
+          {{ form.csrf_token }}
+
+          <div class="form-group">
+            <label for="title" class="form-label">Event Title <span class="required">*</span></label>
+            {{ form.title(class="form-control" + (" is-invalid" if form.title.errors else ""), id="title") }}
+            {% for err in form.title.errors %}
+              <div class="form-error">{{ err }}</div>
+            {% endfor %}
+          </div>
+
+          <div class="form-group">
+            <label for="date" class="form-label">Date & Time <span class="required">*</span></label>
+            {{ form.date(class="form-control" + (" is-invalid" if form.date.errors else ""), id="date") }}
+            {% for err in form.date.errors %}
+              <div class="form-error">{{ err }}</div>
+            {% endfor %}
+          </div>
+
+          <div class="form-group">
+            <label for="location" class="form-label">Location <span class="required">*</span></label>
+            {{ form.location(class="form-control" + (" is-invalid" if form.location.errors else ""), id="location") }}
+            {% for err in form.location.errors %}
+              <div class="form-error">{{ err }}</div>
+            {% endfor %}
+          </div>
+
+          <div class="form-group">
+            <label for="organizer" class="form-label">Organizer <span class="required">*</span></label>
+            {{ form.organizer(class="form-control" + (" is-invalid" if form.organizer.errors else ""), id="organizer") }}
+            {% for err in form.organizer.errors %}
+              <div class="form-error">{{ err }}</div>
+            {% endfor %}
+          </div>
+
+          <div class="form-group">
+            <label for="description" class="form-label">Description <span class="required">*</span></label>
+            {{ form.description(class="form-control" + (" is-invalid" if form.description.errors else ""), id="description", rows=3) }}
+            {% for err in form.description.errors %}
+              <div class="form-error">{{ err }}</div>
+            {% endfor %}
+          </div>
+
+          <div style="margin-top: var(--space-4);">
+            <button type="submit" class="btn btn-primary" style="width: 100%;">
+              Publish Event
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

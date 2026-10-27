@@ -1,0 +1,229 @@
+{% extends "base.html" %}
+
+{% block title %}Admin Review Dashboard{% endblock %}
+
+{% block content %}
+<div class="container" style="padding-top: var(--space-8);">
+  <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: var(--space-6); flex-wrap: wrap; gap: var(--space-4);">
+    <div>
+      <div style="font-size: var(--text-xs); color: var(--primary); font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;">
+        Authorized Administration
+      </div>
+      <h1>Reports Review & Workflow</h1>
+      <p class="text-muted" style="margin-bottom: 0; font-size: var(--text-sm);">
+        Review incoming resident submissions, update progress, moderate content, and manage duplicates.
+      </p>
+    </div>
+    <div style="display: flex; gap: var(--space-3);">
+      <a href="{{ url_for('admin.events') }}" class="btn btn-secondary btn-sm">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+          <line x1="16" y1="2" x2="16" y2="6"></line>
+          <line x1="8" y1="2" x2="8" y2="6"></line>
+        </svg>
+        Manage Events
+      </a>
+      <a href="{{ url_for('public.dashboard') }}" class="btn btn-outline btn-sm" target="_blank">
+        View Public Analytics &nearr;
+      </a>
+    </div>
+  </div>
+
+  <!-- Admin Quick KPI Summary -->
+  <div class="grid-4" style="margin-bottom: var(--space-6);">
+    <div class="stat-card">
+      <span class="stat-label">Total Submissions</span>
+      <span class="stat-value">{{ stats.total_reports }}</span>
+      <span class="stat-subtext">{{ stats.public_count }} approved publicly</span>
+    </div>
+    <div class="stat-card stat-amber">
+      <span class="stat-label">Needs Review</span>
+      <span class="stat-value">{{ stats.status_counts.get('Submitted', 0) + stats.status_counts.get('Under Review', 0) }}</span>
+      <span class="stat-subtext">Submitted or Under Review</span>
+    </div>
+    <div class="stat-card stat-indigo">
+      <span class="stat-label">In Progress</span>
+      <span class="stat-value">{{ stats.status_counts.get('In Progress', 0) }}</span>
+      <span class="stat-subtext">Active volunteer work</span>
+    </div>
+    <div class="stat-card stat-green">
+      <span class="stat-label">Resolved</span>
+      <span class="stat-value">{{ stats.status_counts.get('Resolved', 0) }}</span>
+      <span class="stat-subtext">Verified team completion</span>
+    </div>
+  </div>
+
+  <!-- Filter & Search Bar -->
+  <div class="card" style="margin-bottom: var(--space-6); padding: var(--space-4);">
+    <form method="GET" action="{{ url_for('admin.dashboard') }}" style="display: flex; gap: var(--space-3); flex-wrap: wrap; align-items: flex-end;">
+      <div style="flex: 2; min-width: 220px;">
+        <label for="q" class="form-label">Search Reports</label>
+        <input type="text" name="q" id="q" value="{{ q }}" placeholder="Search ID, description, or area..." class="form-control">
+      </div>
+
+      <div style="flex: 1; min-width: 150px;">
+        <label for="status" class="form-label">Status</label>
+        <select name="status" id="status" class="form-control">
+          <option value="">All Statuses</option>
+          {% for st in statuses %}
+            <option value="{{ st }}" {% if current_status == st %}selected{% endif %}>{{ st }}</option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div style="flex: 1; min-width: 160px;">
+        <label for="category" class="form-label">Category</label>
+        <select name="category" id="category" class="form-control">
+          <option value="">All Categories</option>
+          {% for cat in categories %}
+            <option value="{{ cat }}" {% if current_category == cat %}selected{% endif %}>{{ cat }}</option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div style="flex: 1; min-width: 160px;">
+        <label for="flag" class="form-label">Moderation Flag</label>
+        <select name="flag" id="flag" class="form-control">
+          <option value="">All Records</option>
+          <option value="pending_approval" {% if current_flag == 'pending_approval' %}selected{% endif %}>Pending Public Approval</option>
+          <option value="duplicate" {% if current_flag == 'duplicate' %}selected{% endif %}>Flagged Duplicates</option>
+          <option value="hidden" {% if current_flag == 'hidden' %}selected{% endif %}>Hidden Unsuitable Content</option>
+          <option value="unapproved_photo" {% if current_flag == 'unapproved_photo' %}selected{% endif %}>Unapproved Photos</option>
+        </select>
+      </div>
+
+      <div style="display: flex; gap: var(--space-2);">
+        <button type="submit" class="btn btn-primary">Filter</button>
+        {% if q or current_status or current_category or current_flag %}
+          <a href="{{ url_for('admin.dashboard') }}" class="btn btn-secondary">Clear</a>
+        {% endif %}
+      </div>
+    </form>
+  </div>
+
+  <!-- Reports Table -->
+  {% if reports %}
+    <div class="table-responsive">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th scope="col">ID</th>
+            <th scope="col">Category</th>
+            <th scope="col">Area</th>
+            <th scope="col">Description</th>
+            <th scope="col">Status</th>
+            <th scope="col">Moderation / Flags</th>
+            <th scope="col">Created</th>
+            <th scope="col" style="text-align: right;">Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for r in reports %}
+          <tr>
+            <td data-label="ID">
+              <span style="font-family: monospace; font-weight: 700; color: var(--primary);">
+                {{ r.report_id }}
+              </span>
+            </td>
+            <td data-label="Category">
+              <span class="category-chip">{{ r.category }}</span>
+            </td>
+            <td data-label="Area" style="max-width: 140px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+              📍 {{ r.area }}
+            </td>
+            <td data-label="Description" style="max-width: 260px;">
+              {{ r.description[:80] }}{% if r.description|length > 80 %}...{% endif %}
+            </td>
+            <td data-label="Status">
+              <span class="badge badge-status-{{ r.status.lower().replace(' ', '-') }}">
+                <span class="badge-dot"></span>
+                {{ r.status }}
+              </span>
+            </td>
+            <td data-label="Flags" style="font-size: var(--text-xs);">
+              <div style="display: flex; gap: 4px; flex-wrap: wrap;">
+                {% if r.is_public %}
+                  <span class="badge" style="background:#DCFCE7; color:#166534; font-size: 10px;">Public</span>
+                {% else %}
+                  <span class="badge" style="background:#F1F5F9; color:#475569; font-size: 10px;">Private</span>
+                {% endif %}
+
+                {% if r.is_hidden %}
+                  <span class="badge" style="background:#FEE2E2; color:#DC2626; font-size: 10px;">Hidden</span>
+                {% endif %}
+
+                {% if r.is_duplicate %}
+                  <span class="badge badge-duplicate" style="font-size: 10px;">Duplicate of {{ r.duplicate_of }}</span>
+                {% endif %}
+
+                {% if r.photo_path %}
+                  {% if r.photo_approved %}
+                    <span class="badge" style="background:#E0F2FE; color:#0369A1; font-size: 10px;">Photo Approved</span>
+                  {% else %}
+                    <span class="badge" style="background:#FEF3C7; color:#92400E; font-size: 10px;">Photo Pending</span>
+                  {% endif %}
+                {% endif %}
+              </div>
+            </td>
+            <td data-label="Created" style="font-size: var(--text-xs); color: var(--text-subtle);">
+              {{ r.created_at.strftime('%Y-%m-%d') }}
+            </td>
+            <td data-label="Action" style="text-align: right;">
+              <a href="{{ url_for('admin.report_detail', report_id=r.report_id) }}" class="btn btn-sm btn-primary">
+                Review &rarr;
+              </a>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Pagination -->
+    {% if pagination.pages > 1 %}
+    <nav aria-label="Admin reports pagination">
+      <ul class="pagination">
+        {% if pagination.has_prev %}
+          <li class="page-item">
+            <a class="page-link" href="{{ url_for('admin.dashboard', page=pagination.prev_num, q=q, status=current_status, category=current_category, flag=current_flag) }}">
+              &larr; Prev
+            </a>
+          </li>
+        {% else %}
+          <li class="page-item disabled"><span class="page-link">&larr; Prev</span></li>
+        {% endif %}
+
+        {% for p in pagination.iter_pages(left_edge=1, right_edge=1, left_current=2, right_current=2) %}
+          {% if p %}
+            <li class="page-item {% if p == pagination.page %}active{% endif %}">
+              <a class="page-link" href="{{ url_for('admin.dashboard', page=p, q=q, status=current_status, category=current_category, flag=current_flag) }}">
+                {{ p }}
+              </a>
+            </li>
+          {% else %}
+            <li class="page-item disabled"><span class="page-link">…</span></li>
+          {% endif %}
+        {% endfor %}
+
+        {% if pagination.has_next %}
+          <li class="page-item">
+            <a class="page-link" href="{{ url_for('admin.dashboard', page=pagination.next_num, q=q, status=current_status, category=current_category, flag=current_flag) }}">
+              Next &rarr;
+            </a>
+          </li>
+        {% else %}
+          <li class="page-item disabled"><span class="page-link">Next &rarr;</span></li>
+        {% endif %}
+      </ul>
+    </nav>
+    {% endif %}
+
+  {% else %}
+    <div class="empty-state">
+      <div class="empty-title">No reports match the selected filters</div>
+      <p class="empty-desc">Clear your search parameters or select different moderation filters.</p>
+      <a href="{{ url_for('admin.dashboard') }}" class="btn btn-secondary">Reset Filters</a>
+    </div>
+  {% endif %}
+</div>
+{% endblock %}

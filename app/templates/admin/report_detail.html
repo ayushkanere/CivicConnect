@@ -1,0 +1,282 @@
+{% extends "base.html" %}
+
+{% block title %}Admin Review - {{ report.report_id }}{% endblock %}
+
+{% block content %}
+<div class="container" style="padding-top: var(--space-8);">
+  <!-- Back Button & Breadcrumbs -->
+  <div style="margin-bottom: var(--space-4);">
+    <a href="{{ url_for('admin.dashboard') }}" class="btn btn-secondary btn-sm">
+      &larr; Back to Reports List
+    </a>
+  </div>
+
+  <!-- Header with ID, Status & Quick Action Badges -->
+  <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: var(--space-6); flex-wrap: wrap; gap: var(--space-4);">
+    <div>
+      <span style="font-size: var(--text-xs); color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em;">
+        Report Administration Review
+      </span>
+      <h1 style="font-family: monospace; color: var(--primary); margin-top: 4px; margin-bottom: var(--space-2);">
+        {{ report.report_id }}
+      </h1>
+      <div style="display: flex; gap: var(--space-2); align-items: center; flex-wrap: wrap;">
+        <span class="category-chip">{{ report.category }}</span>
+        <span>📍 {{ report.area }}</span>
+        <span class="text-muted" style="font-size: var(--text-xs);">Submitted {{ report.created_at.strftime('%Y-%m-%d %H:%M') }}</span>
+      </div>
+    </div>
+
+    <div style="text-align: right;">
+      <span class="badge badge-status-{{ report.status.lower().replace(' ', '-') }}" style="font-size: var(--text-sm); padding: 6px 14px;">
+        <span class="badge-dot" style="width: 8px; height: 8px;"></span>
+        Status: {{ report.status }}
+      </span>
+    </div>
+  </div>
+
+  <!-- Moderation Quick Bar -->
+  <div class="card" style="margin-bottom: var(--space-6); background: var(--surface-alt); padding: var(--space-4);">
+    <div style="font-size: var(--text-xs); font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: var(--space-3);">
+      Moderation & Visibility Controls
+    </div>
+    <div style="display: flex; gap: var(--space-3); flex-wrap: wrap; align-items: center;">
+      <!-- Toggle Public Approval -->
+      <form method="POST" action="{{ url_for('admin.report_detail', report_id=report.report_id) }}" style="display:inline;">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <input type="hidden" name="action" value="toggle_public">
+        {% if report.is_public %}
+          <button type="submit" class="btn btn-sm btn-secondary" title="Currently visible on public issue list">
+            ✓ Publicly Approved (Click to make Private)
+          </button>
+        {% else %}
+          <button type="submit" class="btn btn-sm btn-primary" title="Currently private">
+            + Approve for Public Directory
+          </button>
+        {% endif %}
+      </form>
+
+      <!-- Toggle Hide Unsuitable Content -->
+      <form method="POST" action="{{ url_for('admin.report_detail', report_id=report.report_id) }}" style="display:inline;">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <input type="hidden" name="action" value="toggle_hidden">
+        {% if report.is_hidden %}
+          <button type="submit" class="btn btn-sm btn-accent" title="Currently hidden due to violation">
+            ⚠️ Content Hidden (Click to Unhide)
+          </button>
+        {% else %}
+          <button type="submit" class="btn btn-sm btn-secondary" title="Hide abusive or unsuitable text">
+            Hide Unsuitable Content
+          </button>
+        {% endif %}
+      </form>
+
+      <!-- Photo Approval Toggle -->
+      {% if report.photo_path %}
+      <form method="POST" action="{{ url_for('admin.report_detail', report_id=report.report_id) }}" style="display:inline;">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <input type="hidden" name="action" value="toggle_photo_approval">
+        {% if report.photo_approved %}
+          <button type="submit" class="btn btn-sm btn-secondary">
+            ✓ Photo Approved (Click to Hide)
+          </button>
+        {% else %}
+          <button type="submit" class="btn btn-sm btn-primary">
+            + Approve Photo for Public
+          </button>
+        {% endif %}
+      </form>
+      {% endif %}
+
+      <!-- Duplicate Toggle -->
+      {% if report.is_duplicate %}
+      <form method="POST" action="{{ url_for('admin.report_detail', report_id=report.report_id) }}" style="display:inline;">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <input type="hidden" name="action" value="unmark_duplicate">
+        <button type="submit" class="btn btn-sm btn-secondary">
+          Remove Duplicate Flag (Linked to {{ report.duplicate_of }})
+        </button>
+      </form>
+      {% endif %}
+    </div>
+  </div>
+
+  <div class="grid-2" style="align-items: start; margin-bottom: var(--space-8);">
+    <!-- Left Column: Report Details & Photo & Internal Note -->
+    <div style="display: flex; flex-direction: column; gap: var(--space-6);">
+      <!-- Description & Locality Card -->
+      <div class="card">
+        <h3 style="font-size: var(--text-base); margin-bottom: var(--space-2);">Reported Description</h3>
+        <p style="font-size: var(--text-sm); line-height: 1.6; background: var(--bg-page); padding: var(--space-4); border-radius: var(--radius-md); border: 1px solid var(--border); margin-bottom: var(--space-4);">
+          {{ report.description }}
+        </p>
+
+        <div style="font-size: var(--text-sm); color: var(--text-muted);">
+          <strong>Reported Locality:</strong> 📍 {{ report.area }}
+        </div>
+      </div>
+
+      <!-- Photo Card -->
+      {% if report.photo_path %}
+      <div class="card">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--space-3);">
+          <h3 style="font-size: var(--text-base); margin-bottom: 0;">Attached Resident Photo</h3>
+          <span class="badge {% if report.photo_approved %}badge-status-resolved{% else %}badge-status-under-review{% endif %}">
+            {% if report.photo_approved %}Publicly Approved{% else %}Pending Admin Approval{% endif %}
+          </span>
+        </div>
+        <img src="{{ url_for('public.uploaded_file', filename=report.photo_path) }}" alt="Submitted photo" style="border-radius: var(--radius-md); border: 1px solid var(--border); max-height: 340px; width: 100%; object-fit: contain; background: #000;">
+        <p class="text-muted" style="font-size: var(--text-xs); margin-top: var(--space-2);">
+          File: <code>{{ report.photo_path }}</code>. EXIF metadata was sanitized upon upload.
+        </p>
+      </div>
+      {% endif %}
+
+      <!-- Internal Admin Note (Strictly confidential) -->
+      <div class="card" style="border-left: 4px solid var(--primary-dark);">
+        <h3 style="font-size: var(--text-base); margin-bottom: var(--space-2);">Internal Team Note (Private)</h3>
+        <p class="text-muted" style="font-size: var(--text-xs); margin-bottom: var(--space-3);">
+          This note is strictly for authorized project team coordination and is <strong>never displayed</strong> on the public track page.
+        </p>
+        <form method="POST" action="{{ url_for('admin.report_detail', report_id=report.report_id) }}">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+          <input type="hidden" name="action" value="update_internal_note">
+          <div class="form-group">
+            <textarea name="internal_note" rows="3" class="form-control" placeholder="Add confidential notes on team visit, volunteer assignments, or safety assessments...">{{ report.admin_note or '' }}</textarea>
+          </div>
+          <button type="submit" class="btn btn-sm btn-secondary">Save Internal Note</button>
+        </form>
+      </div>
+
+      <!-- Duplicate Marking Form (if not duplicate) -->
+      {% if not report.is_duplicate %}
+      <div class="card">
+        <h3 style="font-size: var(--text-base); margin-bottom: var(--space-2);">Consolidate Duplicate</h3>
+        <p class="text-muted" style="font-size: var(--text-xs); margin-bottom: var(--space-3);">
+          If another resident already logged this issue, enter the original Report ID to link them and prevent duplicate counting.
+        </p>
+        <form method="POST" action="{{ url_for('admin.report_detail', report_id=report.report_id) }}" style="display: flex; gap: var(--space-2);">
+          {{ duplicate_form.csrf_token }}
+          <input type="hidden" name="action" value="mark_duplicate">
+          <div style="flex: 1;">
+            {{ duplicate_form.duplicate_of(class="form-control", placeholder="Original ID (e.g. CC-001)") }}
+          </div>
+          {{ duplicate_form.submit(class="btn btn-secondary btn-sm") }}
+        </form>
+      </div>
+      {% endif %}
+    </div>
+
+    <!-- Right Column: Status Transitions & Notes -->
+    <div style="display: flex; flex-direction: column; gap: var(--space-6);">
+      <!-- 1. Change Status Form -->
+      <div class="card" style="border-top: 4px solid var(--primary);">
+        <h3 style="font-size: var(--text-lg); margin-bottom: var(--space-3);">Update Report Status</h3>
+        <p class="text-muted" style="font-size: var(--text-xs); margin-bottom: var(--space-4);">
+          Transition lifecycle: Submitted &rarr; Under Review &rarr; In Progress &rarr; Resolved. <strong>"Resolved" strictly requires a verification note.</strong>
+        </p>
+
+        <form method="POST" action="{{ url_for('admin.report_detail', report_id=report.report_id) }}" id="status-update-form">
+          {{ status_form.csrf_token }}
+          <input type="hidden" name="action" value="update_status">
+
+          <div class="form-group">
+            <label for="status-status" class="form-label">New Status</label>
+            {{ status_form.status(class="form-control", id="status-status") }}
+          </div>
+
+          <div class="form-group">
+            <label for="status-note" class="form-label">
+              Status Change Note / Verification Note
+            </label>
+            {{ status_form.note(class="form-control", id="status-note") }}
+            <div class="form-helper">
+              If changing to <strong>Resolved</strong>, document verified physical inspection or volunteer action.
+            </div>
+          </div>
+
+          <div class="form-group" style="flex-direction: row; align-items: center; gap: var(--space-2);">
+            {{ status_form.is_public_note(id="status-is_public_note") }}
+            <label for="status-is_public_note" class="form-label" style="margin-bottom: 0; font-weight: normal; font-size: var(--text-sm);">
+              Make note visible on public tracking timeline
+            </label>
+          </div>
+
+          <div style="margin-top: var(--space-4);">
+            <button type="submit" class="btn btn-primary" style="width: 100%;">
+              Confirm Status Transition
+            </button>
+          </div>
+        </form>
+      </div>
+
+      <!-- 2. Post Clarification or Public Note Form -->
+      <div class="card">
+        <h3 style="font-size: var(--text-base); margin-bottom: var(--space-2);">Post Public Update or Clarification</h3>
+        <p class="text-muted" style="font-size: var(--text-xs); margin-bottom: var(--space-4);">
+          Post a message to the resident tracking timeline without changing the overall status.
+        </p>
+
+        <form method="POST" action="{{ url_for('admin.report_detail', report_id=report.report_id) }}">
+          {{ note_form.csrf_token }}
+          <input type="hidden" name="action" value="add_note">
+
+          <div class="form-group">
+            {{ note_form.note(class="form-control") }}
+          </div>
+
+          <div style="display: flex; flex-direction: column; gap: var(--space-2); margin-bottom: var(--space-4);">
+            <div style="display: flex; align-items: center; gap: var(--space-2);">
+              {{ note_form.is_clarification(id="note-clarification") }}
+              <label for="note-clarification" style="font-size: var(--text-xs); font-weight: 600; color: #92400E;">
+                Tag as "Clarification Requested" (asks resident for more details)
+              </label>
+            </div>
+            <div style="display: flex; align-items: center; gap: var(--space-2);">
+              {{ note_form.is_public(id="note-public") }}
+              <label for="note-public" style="font-size: var(--text-xs); color: var(--text-muted);">
+                Show on public tracking timeline
+              </label>
+            </div>
+          </div>
+
+          <button type="submit" class="btn btn-secondary btn-sm">Add Timeline Entry</button>
+        </form>
+      </div>
+
+      <!-- 3. Audit Timeline Display -->
+      <div class="card">
+        <h3 style="font-size: var(--text-base); margin-bottom: var(--space-3);">Full Status Audit History</h3>
+        {% if history %}
+          <div class="timeline" style="margin: var(--space-3) 0;">
+            {% for item in history %}
+            <div class="timeline-item">
+              <div class="timeline-dot"></div>
+              <div class="timeline-content" style="padding: var(--space-3);">
+                <div class="timeline-header" style="margin-bottom: 2px;">
+                  <span class="badge badge-status-{{ item.new_status.lower().replace(' ', '-') }}">
+                    {{ item.new_status }}
+                  </span>
+                  <span class="timeline-time">{{ item.updated_at.strftime('%m/%d %H:%M') }}</span>
+                </div>
+                <div style="font-size: var(--text-xs); color: var(--text-subtle); margin-bottom: 4px;">
+                  Updated by: {% if item.updater %}{{ item.updater.name }}{% else %}Resident Submission{% endif %}
+                  {% if not item.is_public_note %}
+                    <span style="color: var(--color-danger); font-weight: 600;">(Private Note)</span>
+                  {% endif %}
+                </div>
+                {% if item.note %}
+                  <div class="timeline-note" style="font-size: var(--text-xs);">{{ item.note }}</div>
+                {% endif %}
+              </div>
+            </div>
+            {% endfor %}
+          </div>
+        {% else %}
+          <p class="text-muted" style="font-size: var(--text-xs);">No history records.</p>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

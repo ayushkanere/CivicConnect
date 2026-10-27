@@ -1,0 +1,125 @@
+{% extends "base.html" %}
+
+{% block title %}Live Impact Summary & Statistics{% endblock %}
+
+{% block extra_head %}
+<!-- Chart.js CDN -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+{% endblock %}
+
+{% block content %}
+<div class="container" style="padding-top: var(--space-8);">
+  <div style="margin-bottom: var(--space-6);">
+    <h1>Impact Summary & Analytics</h1>
+    <p class="page-lead">
+      Real-time breakdown of community reports, issue categories, and verification status across the portal.
+    </p>
+  </div>
+
+  <!-- Mandatory Scope Disclaimer Notice -->
+  <div class="alert alert-warning" role="note" style="margin-bottom: var(--space-6);">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0;">
+      <circle cx="12" cy="12" r="10"></circle>
+      <line x1="12" y1="8" x2="12" y2="12"></line>
+      <line x1="12" y1="16" x2="12.01" y2="16"></line>
+    </svg>
+    <div style="font-size: var(--text-sm);">
+      <strong>Disclaimer:</strong> {{ stats.disclaimer }}
+    </div>
+  </div>
+
+  <!-- Metric KPI Cards -->
+  <div class="grid-4" style="margin-bottom: var(--space-8);">
+    <div class="stat-card">
+      <span class="stat-label">Total Reports</span>
+      <span class="stat-value">{{ stats.total_reports }}</span>
+      <span class="stat-subtext">All-time portal submissions</span>
+    </div>
+    <div class="stat-card stat-amber">
+      <span class="stat-label">Under Review</span>
+      <span class="stat-value">{{ stats.status_counts.get('Under Review', 0) }}</span>
+      <span class="stat-subtext">Initial volunteer assessment</span>
+    </div>
+    <div class="stat-card stat-indigo">
+      <span class="stat-label">In Progress</span>
+      <span class="stat-value">{{ stats.status_counts.get('In Progress', 0) }}</span>
+      <span class="stat-subtext">Under active coordination</span>
+    </div>
+    <div class="stat-card stat-green">
+      <span class="stat-label">Verified Resolved</span>
+      <span class="stat-value">{{ stats.status_counts.get('Resolved', 0) }}</span>
+      <span class="stat-subtext">Documented & confirmed</span>
+    </div>
+  </div>
+
+  <!-- Interactive Charts Section -->
+  <div class="grid-2" style="margin-bottom: var(--space-8);">
+    <!-- Doughnut Chart: Status Breakdown -->
+    <div class="card">
+      <h3 style="font-size: var(--text-lg); margin-bottom: var(--space-4);">
+        Reports by Current Status
+      </h3>
+      <div style="position: relative; height: 300px;">
+        <canvas id="statusChart" aria-label="Status distribution doughnut chart" role="img"></canvas>
+      </div>
+      <!-- Accessible Data Table Fallback -->
+      <details style="margin-top: var(--space-4); font-size: var(--text-xs); color: var(--text-muted);">
+        <summary>View raw status data table</summary>
+        <table class="data-table" style="margin-top: var(--space-2);">
+          <thead>
+            <tr><th>Status</th><th>Count</th></tr>
+          </thead>
+          <tbody>
+            {% for st, count in stats.status_counts.items() %}
+              <tr><td>{{ st }}</td><td>{{ count }}</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </details>
+    </div>
+
+    <!-- Bar Chart: Category Breakdown -->
+    <div class="card">
+      <h3 style="font-size: var(--text-lg); margin-bottom: var(--space-4);">
+        Reports by Issue Category
+      </h3>
+      <div style="position: relative; height: 300px;">
+        <canvas id="categoryChart" aria-label="Category breakdown bar chart" role="img"></canvas>
+      </div>
+      <!-- Accessible Data Table Fallback -->
+      <details style="margin-top: var(--space-4); font-size: var(--text-xs); color: var(--text-muted);">
+        <summary>View raw category data table</summary>
+        <table class="data-table" style="margin-top: var(--space-2);">
+          <thead>
+            <tr><th>Category</th><th>Count</th></tr>
+          </thead>
+          <tbody>
+            {% for cat, count in stats.category_counts.items() %}
+              <tr><td>{{ cat }}</td><td>{{ count }}</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </details>
+    </div>
+  </div>
+
+  <!-- Operational Context Card -->
+  <div class="card" style="background: var(--surface-alt);">
+    <h3 style="font-size: var(--text-base); margin-bottom: var(--space-2);">Data Integrity & Transparency</h3>
+    <p style="font-size: var(--text-sm); color: var(--text-muted); line-height: 1.5;">
+      All analytics above are computed live directly from records in the CivicConnect database. Duplicate submissions are isolated from public directories and tracked separately to prevent artificial inflation of community issues.
+    </p>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script src="{{ url_for('static', filename='js/charts.js') }}"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const statusData = {{ stats.status_counts | tojson }};
+    const categoryData = {{ stats.category_counts | tojson }};
+    initCivicDashboard(statusData, categoryData);
+  });
+</script>
+{% endblock %}
