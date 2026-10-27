@@ -4,6 +4,8 @@
 > Built for the College Community Engagement Project (CEP)  
 > **Tagline:** REPORT (share local problems) • TRACK (follow progress) • IMPROVE (support community action)
 
+# https://civicconnect-lu7s.onrender.com
+
 ---
 
 ## 1. Project Overview & Scope Rule
