@@ -12,10 +12,13 @@ class Config:
     SECRET_KEY = os.getenv("SECRET_KEY", "dev-fallback-secret-key-change-in-prod-civicconnect")
     
     # Database
-    SQLALCHEMY_DATABASE_URI = os.getenv(
+    raw_db_url = os.getenv(
         "DATABASE_URL", 
         f"sqlite:///{BASE_DIR / 'civicconnect.db'}"
     )
+    if raw_db_url and raw_db_url.startswith("postgres://"):
+        raw_db_url = raw_db_url.replace("postgres://", "postgresql://", 1)
+    SQLALCHEMY_DATABASE_URI = raw_db_url
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     
     # Upload Settings

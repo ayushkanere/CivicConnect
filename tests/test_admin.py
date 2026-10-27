@@ -122,3 +122,51 @@ def test_community_event_management(client, admin_user, db_session):
     event = CommunityEvent.query.filter_by(title="Weekend Lake Cleanup").first()
     assert event is not None
     assert event.location == "Lake Promenade East"
+
+
+def test_init_db_and_admin_from_env(app, monkeypatch, db_session):
+    """Verifies that init_db_and_admin creates an admin account from env variables."""
+    from app.services.auth import init_db_and_admin, authenticate_user
+    from app.models import User
+
+    monkeypatch.setenv("ADMIN_NAME", "CloudAdmin")
+    monkeypatch.setenv("ADMIN_EMAIL", "cloud@civicconnect.local")
+    monkeypatch.setenv("ADMIN_PASSWORD", "SuperCloudPass987!")
+
+    init_db_and_admin(app)
+
+    user = User.query.filter_by(name="CloudAdmin").first()
+    assert user is not None
+    assert user.email == "cloud@civicconnect.local"
+    assert user.role == "admin"
+    assert user.check_password("SuperCloudPass987!") is True
+
+    # Check authentication
+    authenticated = authenticate_user("CloudAdmin", "SuperCloudPass987!")
+    assert authenticated is not None
+    assert authenticated.user_id == user.user_id
+
+
+def test_init_db_and_admin_does_not_reset_password_on_restart(app, monkeypatch, db_session):
+    """Verifies that subsequent restarts do not overwrite or reset an existing admin's password."""
+    from app.services.auth import init_db_and_admin
+    from app.models import User
+
+    # 1. First startup with initial password
+    monkeypatch.setenv("ADMIN_NAME", "PersistentAdmin")
+    monkeypatch.setenv("ADMIN_EMAIL", "persist@civicconnect.local")
+    monkeypatch.setenv("ADMIN_PASSWORD", "OriginalPass123!")
+
+    init_db_and_admin(app)
+    user = User.query.filter_by(name="PersistentAdmin").first()
+    assert user.check_password("OriginalPass123!") is True
+
+    # 2. Simulate restarting app with a different environment password
+    monkeypatch.setenv("ADMIN_PASSWORD", "AttemptedOverwrite999!")
+    init_db_and_admin(app)
+
+    # Password must NOT have been changed
+    db_session.refresh(user)
+    assert user.check_password("OriginalPass123!") is True
+    assert user.check_password("AttemptedOverwrite999!") is False
+
