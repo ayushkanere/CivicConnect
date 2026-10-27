@@ -4,6 +4,8 @@ from app.extensions import db
 from app.models import User, Report, StatusHistory, CommunityEvent
 
 app = create_app(os.getenv("FLASK_ENV", "development"))
+with app.app_context():
+    db.create_all()
 
 
 @app.cli.command("init-db")
