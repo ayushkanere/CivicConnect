@@ -1,4 +1,5 @@
 <img width="1920" height="1020" alt="image" src="https://github.com/user-attachments/assets/57c39291-0f66-4619-94bd-8c2d6e41e4ef" />
+<img width="1920" height="1020" alt="image" src="https://github.com/user-attachments/assets/07634eb2-b4a8-44c2-9231-cb66e71a73d5" />
 
 # CivicConnect
 
